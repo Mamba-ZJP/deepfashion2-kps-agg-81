@@ -8,6 +8,7 @@ WORKERS: 24
 PRINT_FREQ: 50
 
 infer:
+  dataset: 'inferenceDataset'
   root: '../data/snapshot/male-2-outdoor/'
   img_dir: 'imgs'
   mask_dir: 'masks'
@@ -17,7 +18,7 @@ infer:
 
 TEST:
   BATCH_SIZE_PER_GPU: 20
-  COCO_BBOX_FILE: './lib/data/deepfashion2/person_detection_results/val_det_gt.json'
+  # COCO_BBOX_FILE: './lib/data/deepfashion2/person_detection_results/val_det_gt.json'
   BBOX_THRE: 1.0
   IMAGE_THRE: 0.0
   IN_VIS_THRE: 0.2
@@ -27,17 +28,21 @@ TEST:
   OKS_THRE: 0.9
   POST_PROCESS: true
   SHIFT_HEATMAP: true
+  USE_GT_BBOX: true # true
+  FLIP_TEST: false # true
+  POST_PROCESS: true
+  SHIFT_HEATMAP: true
   MAXVAL: 0.6
   # SAVE_DIR: '../infer_result/snapshot/'
 
 DATASET:
   COLOR_RGB: true
-  DATASET: 'inferenceDataset'
+  DATASET: 'deepfashion2agg81kps' #'inferenceDataset'
   DATA_FORMAT: jpg
   FLIP: false # true
   NUM_JOINTS_HALF_BODY: 8
   PROB_HALF_BODY: 0.0 # 0.3
-  ROOT: '/data1/jiapeng/parsing_SCH_ATR/'
+  ROOT: '../data/deepfashion2'
   ROT_FACTOR: 30 # 45
   SCALE_FACTOR: 0.25 # 0.35
   TEST_SET: 'validation' # this cannot be cascaded folders

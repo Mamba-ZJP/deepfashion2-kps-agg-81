@@ -29,8 +29,8 @@ import pdb
 from config import cfg
 from config import update_config
 from core.loss import JointsMSELoss
-from core.function import train
-from core.function import validate, inference
+from core.function import train, validate, inference, validation
+
 from utils.utils import get_optimizer
 from utils.utils import save_checkpoint
 from utils.utils import create_logger
@@ -85,7 +85,7 @@ def parse_args():
     return args
 
 def get_infer_stuff(cfg):
-    infer_dataset = eval('dataset.' + cfg.DATASET.DATASET)(cfg)
+    infer_dataset = eval('dataset.' + cfg.infer.dataset)(cfg)
     infer_loader = torch.utils.data.DataLoader(
         infer_dataset,
         batch_size=cfg.TEST.BATCH_SIZE_PER_GPU*len(cfg.GPUS),
@@ -95,6 +95,26 @@ def get_infer_stuff(cfg):
     )
     return infer_dataset, infer_loader
 
+
+def get_valid_stuff(cfg):
+    normalize = transforms.Normalize(
+        mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+    )
+    valid_dataset = eval('dataset.'+cfg.DATASET.DATASET)(
+        cfg, cfg.DATASET.ROOT, cfg.DATASET.TEST_SET, False,
+        transforms.Compose([
+            transforms.ToTensor(),
+            # normalize,
+        ])
+    )
+    valid_loader = torch.utils.data.DataLoader(
+        valid_dataset,
+        batch_size=cfg.TEST.BATCH_SIZE_PER_GPU*len(cfg.GPUS),
+        shuffle=False,
+        num_workers=cfg.WORKERS,
+        pin_memory=cfg.PIN_MEMORY
+    )
+    return valid_dataset, valid_loader
 
 def main():
     args = parse_args()
@@ -114,10 +134,12 @@ def main():
     checkpoint = torch.load(checkpoint_file)
     model.load_state_dict(checkpoint['state_dict'], strict=True) # load state has problem when strict=True,
 
-    infer_dataset, infer_loader = get_infer_stuff(cfg)
+    dataset, infer_loader = get_infer_stuff(cfg)
+    # dataset, valid_loader = get_valid_stuff(cfg)
 
     print('the threshold is {}'.format(cfg.infer.thresh))
     inference(cfg, infer_loader, model)
+    # validate(cfg, valid_loader, model)
    
 
 if __name__ == '__main__':

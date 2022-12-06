@@ -16,7 +16,7 @@ from utils.transforms import transform_preds
 import pdb
 
 
-def get_max_preds(cfg, batch_heatmaps):
+def get_max_preds(cfg, batch_heatmaps, is_deepfashion2=False):
     '''
     get predictions from score maps
     heatmaps: numpy.ndarray([batch_size, num_joints, height, width])
@@ -50,8 +50,10 @@ def get_max_preds(cfg, batch_heatmaps):
 
     preds *= pred_mask # 坐标乘上0就为0
     # normalize into [0, 1] to learn the relative position
-    preds[..., 0] /= width
-    preds[..., 1] /= height
+
+    if not is_deepfashion2:
+        preds[..., 0] /= width
+        preds[..., 1] /= height
     # pdb.set_trace()
     # print(f'maxpreds: {np.amax(preds)}')
     return preds, maxvals

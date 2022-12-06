@@ -19,7 +19,7 @@ import torch
 from core.evaluate import accuracy
 from core.inference import get_final_preds, get_max_preds
 from utils.transforms import flip_back
-from utils.vis import save_debug_images, save_batch_image_with_joints, save_batch_image_inference
+from utils.vis import save_debug_images, save_batch_image_with_joints, save_batch_image_inference, save_batch_image_deepfashion2
 from utils.write import write_json
 from tqdm import tqdm
 import pdb
@@ -31,9 +31,9 @@ def inference(cfg, infer_loader, model):
     model.eval()
     
     for i, (input, meta) in enumerate(infer_loader):
-        output = model(input)
+        pred = model(input)
         # pdb.set_trace()
-        batch_joints, maxval = get_max_preds(cfg, output.cpu().detach().numpy()) # [B,81,2] [B,81,1]
+        batch_joints, maxval = get_max_preds(cfg, pred.cpu().numpy(), is_deepfashion2=False) # [B,81,2] [B,81,1]
 
         # batch_joints is the relative coordinates 
         # the coordinate of pred should be mapped to the original img
@@ -45,6 +45,20 @@ def inference(cfg, infer_loader, model):
         # write_json(cfg, batch_joints, meta['image_id'], maxval)
         save_batch_image_inference(cfg, input, batch_joints, maxval, meta, cfg.infer.save_dir)
         print('Batch[{}][{}]'.format(i, len(infer_loader)))
+
+
+@torch.no_grad()
+def validation(cfg, loader, model):
+    model.eval()
+    print('the save_dir is {}'.format(cfg.infer.save_dir))
+    for i, (input, _, _, meta) in enumerate(loader):
+        pred = model(input)
+        batch_joints, maxval = get_max_preds(cfg, pred.cpu().numpy(), is_deepfashion2=True)
+
+        save_batch_image_deepfashion2(cfg, input, batch_joints*4, maxval, meta, cfg.infer.save_dir, i)
+        print('Batch[{}][{}]'.format(i, len(loader)))
+        if i == 10:
+            break
 
 
 def train(config, train_loader, model, criterion, optimizer, epoch,

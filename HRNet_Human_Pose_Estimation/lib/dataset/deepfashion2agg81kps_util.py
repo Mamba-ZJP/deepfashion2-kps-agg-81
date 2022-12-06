@@ -68,6 +68,7 @@ def get_kpsname_to_id_map():
                      'long_sleeved_outwear']:
         for i in [24,25,26,27,28,29,30,31,32,33]:
             kpsname_to_id_map[f'{category}_{i}'] = i + 7
+            
     for i in [28,29,30,31,32,33,34,35,36,37]:
             kpsname_to_id_map[f'long_sleeved_dress_{i}'] = i + 3
 

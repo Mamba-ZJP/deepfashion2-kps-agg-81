@@ -27,6 +27,14 @@ left_cuff = np.array([11, 12], dtype=np.uint8)
 right_cuff = np.array([17, 18], dtype=np.uint8)
 # anran_id = np.concatenate([upper_bottom, neck_0, neck_1, bottom_curve, left_cuff, right_cuff], axis=0)
 
+waist = np.array([63, 64, 65])
+skirt = np.array([77,78,79,80,81])
+collar = np.array([1,2,3,4,5,6])
+long_sleeve_left = np.array([21,22,23,24,25,26,27,28,29,30])
+long_sleeve_right = np.array([31,32,33,34,35,36,37,38,39,40])
+
+leyang = np.concatenate([waist, skirt, collar, long_sleeve_left, long_sleeve_right], axis=0)
+
 
 def save_batch_image_inference(cfg, batch_image, batch_joints, maxval, meta, save_dir, nrow=4, padding=0):
     '''
@@ -50,7 +58,7 @@ def save_batch_image_inference(cfg, batch_image, batch_joints, maxval, meta, sav
     # 看下裤子的点有哪些 71~76 -1
     for k, img in enumerate(batch_img_orig):
         for idx, joint in enumerate(batch_joints[k]):
-            if maxval[k, idx] < cfg.infer.thresh: # threshold 
+            if maxval[k, idx] < cfg.infer.thresh or idx not in leyang - 1: # threshold 
                 continue
             cv2.circle(img, (int(joint[0]), int(joint[1])), radius=1, color=[255, 0, 0], thickness=2)
     
@@ -59,59 +67,20 @@ def save_batch_image_inference(cfg, batch_image, batch_joints, maxval, meta, sav
         )
 
 
-
-
-def save_image_inference(cfg, batch_image, batch_joints, maxval, meta, file_name, nrow=4, padding=0):
-    '''
-    batch_image: input of model, tensor: [b, c, h, w] (512, 384)
-    maxval: ndarray: []
-    batch_joints: output of model, ndarray: [b, 81, 2]
-    meta['img_orig']: 
-    meta['bbox_pad'] (xywh): [tensor:[b], .. ,] 
-    '''
-    k = 0 # 先取第一个样例做测试
-    batch_origin_img = meta['img_orig'].permute(0, 3, 1, 2)
-    img = batch_origin_img[k].permute(1, 2, 0).numpy().copy()
-
-    # 单独判断下neck的置信度
-    if np.sum(maxval[k, neck_0 - 1]) > np.sum(maxval[k, neck_1 - 1]):
-        anran_id = np.concatenate([upper_bottom, neck_0, bottom_curve, left_cuff, right_cuff], axis=0)
-    else:
-        anran_id = np.concatenate([upper_bottom, neck_1, bottom_curve, left_cuff, right_cuff], axis=0)
-
-    for idx, joint in enumerate(batch_joints[0]):
-        if idx not in anran_id - 1 or maxval[k, idx] < cfg.TEST.MAXVAL: # 不在anran的点里面，或者置信度过小
-            continue
-        cv2.circle(img, (int(joint[0]), int(joint[1])), radius=1, color=[255, 0, 0], thickness=2)
-    cv2.imwrite(file_name, cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
-
-
-    # grid = torchvision.utils.make_grid(batch_origin_img, nrow, padding, True) 
-    # ndarr = grid.mul(255).clamp(0, 255).byte().permute(1, 2, 0).cpu().numpy()
-    # ndarr = ndarr.copy()
-    # nmaps = batch_image.size(0)
-    # xmaps = min(nrow, nmaps)
-    # ymaps = int(math.ceil(float(nmaps) / xmaps))
-    # height = int(batch_origin_img.shape[2] + padding)
-    # width = int(batch_origin_img.shape[3] + padding)
-    # k = 0
-    # for row in range(ymaps):
-    #     for col in range(xmaps):
-    #         if k >= nmaps:
-    #             break
-    #         joints = batch_joints[k] # in save gt, torch.unique(joints) => [0.]
-    #         # pdb.set_trace()
-    #         for idx, joint in enumerate(joints):
-    #             joint[0] = col * width + joint[0]
-    #             joint[1] = row * height + joint[1]
-    #             # if joint_vis[0]: # 只有gt 标注且可见 的点才会画
-    #             if idx not in (anran_id - 1): #and idx not in dress:
-    #                 continue
-    #             cv2.circle(ndarr, (int(joint[0]), int(joint[1])), 2, [255, 0, 0], 2)
-    #         k = k + 1
+def save_batch_image_deepfashion2(cfg, input, batch_joints, maxval, meta, save_dir, batch):
+    if not osp.exists(save_dir):
+        os.makedirs(save_dir)
     
-    # cv2.imwrite(file_name, cv2.cvtColor(ndarr, cv2.COLOR_RGB2BGR))
-
+    # pdb.set_trace()
+    input = input.mul(255).clamp(0, 255).byte().permute(0,2,3,1).cpu().numpy().copy()
+    for k, img in enumerate(input):
+        for idx, joint in enumerate(batch_joints[k]):
+            if maxval[k, idx] < cfg.infer.thresh:
+                continue
+            cv2.circle(img, (int(joint[0]), int(joint[1])), radius=1, color=[255, 0, 0], thickness=2)
+        cv2.imwrite(
+            osp.join(save_dir, f'{batch}_{k}.png'), cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        )
 
 
 def save_batch_image_with_joints(batch_image, batch_joints, batch_joints_vis,

@@ -36,12 +36,13 @@ _C.RANK = 0
 
 # setting of inference
 _C.infer = CN()
+_C.infer.dataset = 'inferenceDataset'
 _C.infer.root = ''
 _C.infer.img_dir = ''
 _C.infer.parse_dir = ''
 _C.infer.mask_dir = ''
 _C.infer.save_dir = ''
-_C.infer.thresh = 0.3
+_C.infer.thresh = 0.5
 
 # Cudnn related params
 _C.CUDNN = CN()
