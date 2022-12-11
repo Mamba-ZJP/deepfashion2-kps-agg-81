@@ -1,20 +1,27 @@
 # Aggregation and Finetuning for Clothes Landmark Detection
 
-__[WIP] Code release is still in preparation, stay tuned.__
+**This is a code repo of https://github.com/lzhbrian/deepfashion2-kps-agg-finetune**. But the original repo said the "__[WIP] Code release is still in preparation, stay tuned.__" Thus, this repo fix some problems in the original repo and can be ran . More details can be found in the orginal repo.
 
 
+__1st place solution__ for [__CVPR 2020 DeepFashion2 Clothes Landmark Detection Track__](https://competitions.codalab.org/competitions/22966). 
 
-__1st place solution__ for [__CVPR 2020 DeepFashion2 Clothes Landmark Detection Track__](https://competitions.codalab.org/competitions/22966). This repo contains code for the keypoints detector. The object detection part is not contained.
+This repo contains code for the keypoints detector on [**Deepfashion2**](https://github.com/switchablenorms/DeepFashion2). (The object detection part is not contained.)
 
 <img src="res/cmp.png" width="50%">
 
-
+**In summary, this repo uses HRNet to detect the lankmarks of different clothes.**
 
 ## Prerequisite
 
 ### Install
 
-* install HRNet dependencies as in [HRNet/HRNet-Human-Pose-Estimation](https://github.com/HRNet/HRNet-Human-Pose-Estimation), then
+* install HRNet dependencies as in [HRNet/HRNet-Human-Pose-Estimation](https://github.com/HRNet/HRNet-Human-Pose-Estimation)
+    ```
+    cd HRNet-Human-Pose-Estimation/lib
+    pip install -r requirements.txt
+    ```
+
+    then install nms dependencies
 
     ```
     cd HRNet-Human-Pose-Estimation/lib
@@ -29,11 +36,15 @@ __1st place solution__ for [__CVPR 2020 DeepFashion2 Clothes Landmark Detection 
     make install
     ```
 
-    
 
 ### Data preprocess
 
-* download data to `HRNet-Human-Pose-Estimation/lib/data/deepfashion2/`
+* download data to `HRNet-Human-Pose-Estimation/data/` or any place you want. You just need to change the corresponding location in your experiment config file, ie., the config files in `HRNet-Human-Pose-Estimation/experiments/`.
+
+* Aggregate 294 lankmarks to 81 landmarks, according to similar positions. It receives `train_coco.json` and convert it to `train_coco_agg81kps.json`. (If you need to finetune on each category, you should do the same convertion.)
+    ```python
+    python scripts/dataset_agg81kps.py # But you need to change the location of infile and outfile.
+    ```
 
 * preprocess data to following structure
 
@@ -63,31 +74,29 @@ __1st place solution__ for [__CVPR 2020 DeepFashion2 Clothes Landmark Detection 
 
 
 
-
-
 ## Usage
 
 ### Training
-
-* Aggregation
+Deepfashion2 has gt bounding box annotations for clothes.
+* Traing under aggregation 81 keypoints
 
     ```bash
-    python tools/train.py --cfg experiments/deepfashion2/w48_512x384_adam_lr1e-3-agg81kps.yaml
+    cd tools
+    python train.py --cfg experiments/deepfashion2/w48_512x384_adam_lr1e-3-agg81kps.yaml
     ```
 
-* Finetune
+* Finetune on each category (13 categories in total)
 
     ```bash
+    cd tools
     # finetuning 1st category
-    python tools/train.py --cfg experiments/deepfashion2/w48_512x384_adam_lr1e-3-agg81kps-category1-hflip.yaml
+    python train.py --cfg experiments/deepfashion2/w48_512x384_adam_lr1e-3-agg81kps-category1-hflip.yaml
     # finetuning 2nd category
-    python tools/train.py --cfg experiments/deepfashion2/w48_512x384_adam_lr1e-3-agg81kps-category2-hflip.yaml
+    python train.py --cfg experiments/deepfashion2/w48_512x384_adam_lr1e-3-agg81kps-category2-hflip.yaml
     # finetuning others ...
     ```
 
-
 ​    
-
 ### Testing
 
 * Testing on validation set (with gt det)
@@ -110,16 +119,17 @@ __1st place solution__ for [__CVPR 2020 DeepFashion2 Clothes Landmark Detection 
         --cfg experiments/deepfashion2/w48_512x384_adam_lr1e-3-agg81kps-category1-hflip.yaml \
     GPUS '(0,1,2,3)' \
         TEST.MODEL_FILE output/deepfashion2agg81kps/pose_hrnet/w48_512x384_adam_lr1e-3-agg81kps-category1-hflip/final_state.pth \
-        TEST.USE_GT_BBOX False \
-        TEST.COCO_BBOX_FILE '/path/to/det.json' \
+        TEST.USE_GT_BBOX False \ # Use your detection bounding box
+        TEST.COCO_BBOX_FILE '/path/to/det.json' \ 
         TEST.IMAGE_THRE 0.01 \
         DATASET.TEST_SET validation \
         TEST.FLIP_TEST True
-    
     ...
     ```
+* I provide the [pretrained model](https://1drv.ms/u/s!Av2b0BEYRpRSpQC4vXEsMf2MkQwZ?e=LXY2XZ). You can download it and put it anywhere you want, but you need to change the config file or code in `train.py, test.py`.
 
-
+## Note
+- When I re-implement this repo, I find a confict between packages. Thus I **comment the evalution code**, which would cause some error. But this would not affect the training process.
 
 ## Reference
 
