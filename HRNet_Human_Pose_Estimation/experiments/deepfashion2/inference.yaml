@@ -8,11 +8,11 @@ WORKERS: 24
 PRINT_FREQ: 50
 
 infer:
-  root: '../data/snapshot/male-2-outdoor/'
+  root: './data/snapshot/male-2-outdoor/'
   img_dir: 'imgs'
   mask_dir: 'masks'
   parse_dir: 'parsing_SCH_ATR'
-  save_dir: '../infer_result/snapshot/male-2-outdoor'
+  save_dir: './infer_result/snapshot/male-2-outdoor'
   thresh: 0.4
 
 TEST:

@@ -81,21 +81,18 @@ Deepfashion2 has gt bounding box annotations for clothes.
 * Traing under aggregation 81 keypoints
 
     ```bash
-    cd tools
-    python train.py --cfg experiments/deepfashion2/w48_512x384_adam_lr1e-3-agg81kps.yaml
+    python tools/train.py --cfg experiments/deepfashion2/w48_512x384_adam_lr1e-3-agg81kps.yaml
     ```
 
 * Finetune on each category (13 categories in total)
 
     ```bash
-    cd tools
     # finetuning 1st category
-    python train.py --cfg experiments/deepfashion2/w48_512x384_adam_lr1e-3-agg81kps-category1-hflip.yaml
+    python tools/train.py --cfg experiments/deepfashion2/w48_512x384_adam_lr1e-3-agg81kps-category1-hflip.yaml
     # finetuning 2nd category
-    python train.py --cfg experiments/deepfashion2/w48_512x384_adam_lr1e-3-agg81kps-category2-hflip.yaml
+    python tools/train.py --cfg experiments/deepfashion2/w48_512x384_adam_lr1e-3-agg81kps-category2-hflip.yaml
     # finetuning others ...
     ```
-
 ​    
 ### Testing
 
@@ -128,8 +125,18 @@ Deepfashion2 has gt bounding box annotations for clothes.
     ```
 * I provide the [pretrained model](https://1drv.ms/u/s!Av2b0BEYRpRSpQC4vXEsMf2MkQwZ?e=LXY2XZ). You can download it and put it anywhere you want, but you need to change the config file or code in `train.py, test.py`.
 
+- Test with your own data. (In `inference_test.py`, I delete the logger and some useless code part.)
+
+    **Note**: cloth landmark detection needs cloth bbox, I use [RobustVideoMatting](https://github.com/PeterL1n/RobustVideoMatting) to get mask of human and get the smallest bbox out of this mask. Hence, you can choose Yolo or any object detector to obtain that bbox, and meanwhile change the code in the `dataset/inferenceDataset.py` in `__getitem__()` to load bbox.  
+    Then
+
+    ```bash
+    python tools/inference_test.py
+    ```
+
 ## Note
 - When I re-implement this repo, I find a confict between packages. Thus I **comment the evalution code**, which would cause some error. But this would not affect the training process.
+- The organization of this repo is a little bit messy, including the path.
 
 ## Reference
 

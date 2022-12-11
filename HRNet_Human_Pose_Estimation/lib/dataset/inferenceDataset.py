@@ -44,7 +44,7 @@ class InferenceDataset(Dataset):
         # img_dir, mask_dir, parse_dir)
 
         self.imgs_path = self.get_img_path(img_dir)
-        self.parses_path = self.get_parse_path(parse_dir)
+        # self.parses_path = self.get_parse_path(parse_dir)
         self.masks_path = self.get_mask_path(mask_dir)
         print(len(self.imgs_path))
         self.image_width = cfg.MODEL.IMAGE_SIZE[0] # 384
@@ -91,7 +91,7 @@ class InferenceDataset(Dataset):
 
     def __getitem__(self, idx):
         img = Image.open(self.imgs_path[idx]).convert('RGB') # cv2的所有处理代码是不是都需要bgr？
-        parse = np.load(self.parses_path[idx], allow_pickle=True)
+        # parse = np.load(self.parses_path[idx], allow_pickle=True)
         mask = cv2.imread(self.masks_path[idx], flags=cv2.IMREAD_UNCHANGED)
         assert len(mask.shape) == 2, "mask's dim is not 2, shape is {}".format(mask.shape)
 

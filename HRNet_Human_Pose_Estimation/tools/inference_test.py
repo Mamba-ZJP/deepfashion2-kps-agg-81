@@ -7,7 +7,7 @@ from locale import normalize
 import os
 import sys
 import pprint
-sys.path.append('../lib')
+sys.path.append('./lib')
 # print(sys.path)
 
 from core.inference import get_final_preds
@@ -55,7 +55,7 @@ def parse_args():
                         help='experiment configure file name',
                         required=False,
                         type=str,
-                        default='../experiments/deepfashion2/inference.yaml')
+                        default='./experiments/deepfashion2/inference.yaml')
 
     parser.add_argument('opts',
                         help="Modify config options using the command-line",
@@ -97,6 +97,7 @@ def get_infer_stuff(cfg):
 
 
 def main():
+    
     args = parse_args()
     
     update_config(cfg, args)
@@ -104,12 +105,11 @@ def main():
     
     model = eval('models.'+cfg.MODEL.NAME+'.get_pose_net')(cfg, is_train=False)
 
-
     device = torch.device(f'cuda:{cfg.GPUS[0]}') if len(cfg.GPUS) > 0 else 'cpu'
     model = torch.nn.DataParallel(model, device_ids=cfg.GPUS).to(device)
 
     # checkpoint_file = os.path.join(final_output_dir, '81kpscheckpoint.pth')
-    checkpoint_file = '../output/deepfashion2agg81kps/pose_hrnet/w48_512x384_adam_lr1e-3-agg81kps/81kpscheckpoint.pth'
+    checkpoint_file = './output/deepfashion2agg81kps/pose_hrnet/w48_512x384_adam_lr1e-3-agg81kps/81kpscheckpoint.pth'
         
     checkpoint = torch.load(checkpoint_file)
     model.load_state_dict(checkpoint['state_dict'], strict=True) # load state has problem when strict=True,
