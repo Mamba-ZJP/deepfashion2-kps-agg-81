@@ -136,7 +136,7 @@ Deepfashion2 has gt bounding box annotations for clothes.
 
 ## Note
 - When I re-implement this repo, I find a confict between packages. Thus I **comment the evalution code**, which would cause some error. But this would not affect the training process.
-- The organization of this repo is a little bit messy, including the path.
+- The organization of this repo is a little bit messy, including the path. Hence, you might need to adjust by yourself, which is not difficult I think.
 
 ## Reference
 
