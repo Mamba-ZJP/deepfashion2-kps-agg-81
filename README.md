@@ -17,14 +17,14 @@ This repo contains code for the keypoints detector on [**Deepfashion2**](https:/
 
 * install HRNet dependencies as in [HRNet/HRNet-Human-Pose-Estimation](https://github.com/HRNet/HRNet-Human-Pose-Estimation)
     ```
-    cd HRNet-Human-Pose-Estimation/lib
+    cd HRNet_Human-Pose_Estimation
     pip install -r requirements.txt
     ```
 
     then install nms dependencies
 
     ```
-    cd HRNet-Human-Pose-Estimation/lib
+    cd HRNet_Human_Pose_Estimation/lib
     make
     ```
 
